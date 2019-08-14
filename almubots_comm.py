@@ -20,20 +20,20 @@ class Comm:
     def rotate(self, angle):
         if angle < 0.:
             angle = -1
-        if angle > 0.
+        if angle > 0.:
             angle = 1
         self.cmd['rotation'] = angle
 
     def move(self, dx, dy):
         if dx < 0.:
             dx = -1
-        if dx > 0.
+        if dx > 0.:
             dx = 1
         self.cmd['dx'] = dx
 
         if dy < 0.:
             dy = -1
-        if dy > 0.
+        if dy > 0.:
             dy = 1
         self.cmd['dy'] = dy
 
