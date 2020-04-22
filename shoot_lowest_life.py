@@ -2,7 +2,7 @@ from math import atan2, pi
 
 from almubots_comm import Comm
 
-botId = 0
+botId = 1
 
 if __name__ == '__main__':
     comm = Comm(botId)
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     while True:
         status = comm.send()
         me = status['bots'][botId]
-        enemy = status['bots'][1]
+        enemy = status['bots'][0]
 
         for bot in status['bots']:
             if bot is not me and bot['life'] != 0:
@@ -19,10 +19,17 @@ if __name__ == '__main__':
 
         alfa = atan2(enemy['y'] - me['y'], enemy['x'] - me['x'])
         alfa = alfa * 180 / pi
+        angle_diff = abs(me['angle']-alfa)
         if alfa > me['angle']:
-            comm.rotate(1)
+            if angle_diff <= 180:
+                comm.rotate(1)
+            else:
+                comm.rotate(-1)
         if alfa < me['angle']:
-            comm.rotate(-1)
+            if angle_diff <= 180:
+                comm.rotate(-1)
+            else:
+                comm.rotate(1)
 
         dx = 0
         dy = 0
