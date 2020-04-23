@@ -17,7 +17,7 @@ def getch():
 
 
 if __name__ == '__main__':
-    comm = Comm(1)
+    comm = Comm(0)
 
     while True:
         ch = getch()

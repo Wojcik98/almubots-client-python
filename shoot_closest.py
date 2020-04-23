@@ -1,112 +1,106 @@
 from almubots_comm import Comm
 import math
 
-def dist(myBot, enBot):
-	X = myBot['x'] - enBot['x']
-	Y = myBot['y'] - enBot['y']
-	return math.sqrt(X*X + Y*Y)
 
-def rotateBot(myBot, closeBot, mainBot):
-	X = closeBot['x'] - myBot['x']
-	Y = closeBot['y'] - myBot['y']
-	vx = closeBot['vx']
-	vy = closeBot['vy']
-	ang = myBot['angle']
+class ShootClosestBot:
+    def __init__(self, bot_num):
+        self.bot_num = bot_num
+        self.comm = Comm(bot_num)
 
-	A = 0 # angle to enemy
-	if X!=0: A = math.atan(Y/X)*180/math.pi
-	if X<0: A+=180
-	A -= ang
-	A //=1
-	A %= 360
-	if A % 10 !=5:
+    def dist(self, my_bot, enemy_bot):
+        x = my_bot['x'] - enemy_bot['x']
+        y = my_bot['y'] - enemy_bot['y']
+        return math.sqrt(x * x + y * y)
 
-		A = round(A/10,0)
-		A %= 36
+    def rotateBot(self, my_bot, closest_bot, main_bot):
+        x = closest_bot['x'] - my_bot['x']
+        y = closest_bot['y'] - my_bot['y']
+        ang = my_bot['angle']
 
-		if A>18: comm.rotate(-(36-A))
-		else: comm.rotate(A)
+        angle_to_enemy = 0
+        if x != 0:
+            angle_to_enemy = math.atan(y / x) * 180 / math.pi
+        if x < 0:
+            angle_to_enemy += 180
+        angle_to_enemy -= ang
+        angle_to_enemy //= 1
+        angle_to_enemy %= 360
+        if angle_to_enemy % 10 != 5:
 
-		if myBot['ammo']<5:
-		  if closeBot == mainBot: comm.shoot(1)
-		else: comm.shoot(1)
+            angle_to_enemy = round(angle_to_enemy / 10, 0)
+            angle_to_enemy %= 36
 
-def sgn(val):
-	if val > 0:
-		return 1
-	if val < 0:
-		return -1
-	return 0
+            if angle_to_enemy > 18:
+                self.comm.rotate(-(36 - angle_to_enemy))
+            else:
+                self.comm.rotate(angle_to_enemy)
 
+            if my_bot['ammo'] < 5:
+                if closest_bot == main_bot: self.comm.shoot(1)
+            else:
+                self.comm.shoot(1)
 
-if __name__ == '__main__':
-	botNum = 2
-	comm = Comm(botNum)
+    def sgn(self, val):
+        if val > 0:
+            return 1
+        if val < 0:
+            return -1
+        return 0
 
-	status = comm.send()
-	newX = 0
-	while True:
-		newX += 1
-		if newX == 360: newX = 0
-		sinX = sgn(math.sin(newX))
-		bots = status['bots']
+    def run(self):
+        status = self.comm.send()
+        new_x = 0
+        while True:
+            new_x += 1
+            if new_x == 360:
+                new_x = 0
+            bots = status['bots']
 
-        # my bot
-		myBot = bots[botNum]
-		myX = myBot['x']
-		myY = myBot['y']
+            # my bot
+            my_bot = bots[self.bot_num]
+            my_x = my_bot['x']
+            my_y = my_bot['y']
 
-		#enemies
-		curBot = {
-			'id' : 0,
-			'x' : 0,
-			'y' : 0,
-			'vx' : 0,
-			'vy' : 0,
-			'angle' : 0,
-			'ammo' : 0,
-			'life' : 100,
-			'shoot' : False,
-			'score' : 0
-		}
-		mainBot = curBot # lowest hp bot
-		botID = 0         # lowest hp bot id
-		curID = -1
-		for bot in bots:
-			curID += 1
-			if bot == myBot:
-				continue
-			enemyHP = bot['life']
-			if enemyHP < mainBot['life'] and enemyHP > 0:
-				 mainBot = bot
-				 botID = curID
-			if enemyHP == mainBot['life'] and enemyHP > 0:
-				if dist(myBot, bot) < dist(myBot, mainBot) and enemyHP > 0:
-					mainBot = bot
-					botID = curID
+            # enemies
+            current_bot = {
+                'id': 0,
+                'x': 0,
+                'y': 0,
+                'vx': 0,
+                'vy': 0,
+                'angle': 0,
+                'ammo': 0,
+                'life': 100,
+                'shoot': False,
+                'score': 0
+            }
+            lowest_hp_bot = current_bot
+            for bot in bots:
+                if bot == my_bot:
+                    continue
+                enemy_hp = bot['life']
+                if lowest_hp_bot['life'] > enemy_hp > 0:
+                    lowest_hp_bot = bot
+                if enemy_hp == lowest_hp_bot['life'] and enemy_hp > 0:
+                    if self.dist(my_bot, bot) < self.dist(my_bot, lowest_hp_bot) and enemy_hp > 0:
+                        lowest_hp_bot = bot
 
-		closeBot = mainBot # closest bot
-		closeID = 0        # closest bot id
-		curID = -1
-		for bot in bots:
-			curID += 1
-			enemyHP = bot['life']
-			if bot == myBot:
-				continue
-			if dist(myBot, bot) < dist(myBot, closeBot) and enemyHP > 0:
-				closeBot = bot
-				closeID = curID
+            closest_bot = lowest_hp_bot
+            for bot in bots:
+                enemy_hp = bot['life']
+                if bot == my_bot:
+                    continue
+                if self.dist(my_bot, bot) < self.dist(my_bot, closest_bot) and enemy_hp > 0:
+                    closest_bot = bot
 
-		# move to enemy
-		if dist(myBot,closeBot)>150:
-			comm.move(sgn(mainBot['x']-myX),sgn(mainBot['y']-myY))
-		else:
-			comm.move(-sgn(mainBot['x']-myX),-sgn(mainBot['y']-myY))
-		if dist(myBot,mainBot)<300 and mainBot['life']>0:
-			closeBot = mainBot
+            # move to enemy
+            if self.dist(my_bot, closest_bot) > 150:
+                self.comm.move(self.sgn(lowest_hp_bot['x'] - my_x), self.sgn(lowest_hp_bot['y'] - my_y))
+            else:
+                self.comm.move(-self.sgn(lowest_hp_bot['x'] - my_x), -self.sgn(lowest_hp_bot['y'] - my_y))
+            if self.dist(my_bot, lowest_hp_bot) < 300 and lowest_hp_bot['life'] > 0:
+                closest_bot = lowest_hp_bot
 
-		rotateBot(myBot, closeBot, mainBot) # rotate rifle
+            self.rotateBot(my_bot, closest_bot, lowest_hp_bot)
 
-
-		status = comm.send()
-
+            status = self.comm.send()
