@@ -1,16 +1,13 @@
 from almubots_comm import Comm
 import math
 
+from bot_utils import dist, sgn
+
 
 class ShootClosestBot:
     def __init__(self, bot_num):
         self.bot_num = bot_num
         self.comm = Comm(bot_num)
-
-    def dist(self, my_bot, enemy_bot):
-        x = my_bot['x'] - enemy_bot['x']
-        y = my_bot['y'] - enemy_bot['y']
-        return math.sqrt(x * x + y * y)
 
     def rotateBot(self, my_bot, closest_bot, main_bot):
         x = closest_bot['x'] - my_bot['x']
@@ -36,16 +33,10 @@ class ShootClosestBot:
                 self.comm.rotate(angle_to_enemy)
 
             if my_bot['ammo'] < 5:
-                if closest_bot == main_bot: self.comm.shoot(1)
+                if closest_bot == main_bot:
+                    self.comm.shoot(1)
             else:
                 self.comm.shoot(1)
-
-    def sgn(self, val):
-        if val > 0:
-            return 1
-        if val < 0:
-            return -1
-        return 0
 
     def run(self):
         status = self.comm.send()
@@ -82,7 +73,7 @@ class ShootClosestBot:
                 if lowest_hp_bot['life'] > enemy_hp > 0:
                     lowest_hp_bot = bot
                 if enemy_hp == lowest_hp_bot['life'] and enemy_hp > 0:
-                    if self.dist(my_bot, bot) < self.dist(my_bot, lowest_hp_bot) and enemy_hp > 0:
+                    if dist(my_bot, bot) < dist(my_bot, lowest_hp_bot) and enemy_hp > 0:
                         lowest_hp_bot = bot
 
             closest_bot = lowest_hp_bot
@@ -90,15 +81,15 @@ class ShootClosestBot:
                 enemy_hp = bot['life']
                 if bot == my_bot:
                     continue
-                if self.dist(my_bot, bot) < self.dist(my_bot, closest_bot) and enemy_hp > 0:
+                if dist(my_bot, bot) < dist(my_bot, closest_bot) and enemy_hp > 0:
                     closest_bot = bot
 
             # move to enemy
-            if self.dist(my_bot, closest_bot) > 150:
-                self.comm.move(self.sgn(lowest_hp_bot['x'] - my_x), self.sgn(lowest_hp_bot['y'] - my_y))
+            if dist(my_bot, closest_bot) > 150:
+                self.comm.move(sgn(lowest_hp_bot['x'] - my_x), sgn(lowest_hp_bot['y'] - my_y))
             else:
-                self.comm.move(-self.sgn(lowest_hp_bot['x'] - my_x), -self.sgn(lowest_hp_bot['y'] - my_y))
-            if self.dist(my_bot, lowest_hp_bot) < 300 and lowest_hp_bot['life'] > 0:
+                self.comm.move(-sgn(lowest_hp_bot['x'] - my_x), -sgn(lowest_hp_bot['y'] - my_y))
+            if dist(my_bot, lowest_hp_bot) < 300 and lowest_hp_bot['life'] > 0:
                 closest_bot = lowest_hp_bot
 
             self.rotateBot(my_bot, closest_bot, lowest_hp_bot)
