@@ -2,7 +2,7 @@ import sys
 import termios
 import tty
 
-from almubots_comm import Comm
+from utils.almubots_comm import Comm
 
 
 def getch():

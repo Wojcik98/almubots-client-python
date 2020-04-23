@@ -1,6 +1,6 @@
 from math import atan2, pi
 
-from almubots_comm import Comm
+from utils.almubots_comm import Comm
 
 
 class ShootLowestLifeBot:

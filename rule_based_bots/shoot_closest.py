@@ -1,7 +1,7 @@
-from almubots_comm import Comm
+from utils.almubots_comm import Comm
 import math
 
-from bot_utils import dist, sgn
+from utils.bot_utils import dist, sgn
 
 
 class ShootClosestBot:

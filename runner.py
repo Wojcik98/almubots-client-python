@@ -1,7 +1,7 @@
 import threading
 
-from shoot_closest import ShootClosestBot
-from shoot_lowest_life import ShootLowestLifeBot
+from rule_based_bots.shoot_closest import ShootClosestBot
+from rule_based_bots.shoot_lowest_life import ShootLowestLifeBot
 
 if __name__ == '__main__':
     threading.Thread(target=ShootClosestBot(1).run).start()
