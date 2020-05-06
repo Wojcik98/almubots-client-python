@@ -11,7 +11,13 @@ class Comm:
         ip, port = 'localhost', '8080'
         url = f'http://{ip}:{port}/cmd'
 
-        raw = requests.post(url, json=self.cmd)
+        while True:
+            try:
+                raw = requests.post(url, json=self.cmd)
+                break
+            except requests.exceptions.ConnectionError:
+                print('Connection refused')
+
         status = json.loads(raw.text)
         self.reset_cmd()
 
