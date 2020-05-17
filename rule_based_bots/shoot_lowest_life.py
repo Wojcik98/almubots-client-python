@@ -27,7 +27,7 @@ class ShootLowestLifeBot:
                     self.comm.rotate(1)
                 else:
                     self.comm.rotate(-1)
-            if angle < me['angle']:
+            elif angle < me['angle']:
                 if angle_diff <= 180:
                     self.comm.rotate(-1)
                 else:
