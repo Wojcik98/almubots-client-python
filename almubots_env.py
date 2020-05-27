@@ -63,10 +63,12 @@ class AlmubotsEnv(gym.Env):
         }
         self.comm.move(movement.get(action)[0], movement.get(action)[1])
 
-        state_raw = (self.comm.send())['bots']
+        state_raw = (self.comm.send())
+
+        bots_status = state_raw['bots']
 
         self.state = []
-        for bot in state_raw:
+        for bot in bots_status:
             self.state.append(bot["x"])
             self.state.append(bot["y"])
             self.state.append(bot["vx"])
@@ -77,9 +79,11 @@ class AlmubotsEnv(gym.Env):
             self.state.append(bot["shoot"])
             self.state.append(bot["score"])
 
-        reward = state_raw[self.bot_num]['score']
+        reward = bots_status[self.bot_num]['score']
 
-        return np.array(self.state), reward, False, {}
+        done = state_raw['reset']
+
+        return np.array(self.state), reward, done, {}
 
     def reset(self):
         pass
