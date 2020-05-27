@@ -86,9 +86,11 @@ class AlmubotsEnv(gym.Env):
         return np.array(self.state), reward, done, {}
 
     def reset(self):
+        # env resets itself
         pass
 
     def render(self, mode='human'):
+        # why render, when u can NOT TO FOR ONLY 19.99$ IF U CALL US RIGHT NOW!
         pass
 
 # rotation, vx, vy, shoot
