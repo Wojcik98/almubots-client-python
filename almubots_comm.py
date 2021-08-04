@@ -3,13 +3,14 @@ import requests
 
 
 class Comm:
-    def __init__(self, bot_number):
+    def __init__(self, ip, bot_number):
+        self.ip = ip
         self.cmd = {'botNo': bot_number}
         self.session = requests.Session()
         self.reset_cmd()
 
     def send(self):
-        ip, port = 'localhost', '8080'
+        ip, port = self.ip, '8080'
         url = f'http://{ip}:{port}/cmd'
 
         raw = self.session.post(url, json=self.cmd)
